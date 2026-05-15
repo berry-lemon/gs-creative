@@ -1,0 +1,391 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #0d0d0d;
+  color: #e5e5e5;
+}
+
+/* ReactFlow overrides */
+.react-flow {
+  background: #0d0d0d;
+}
+
+.react-flow__background {
+  background: #0d0d0d;
+}
+
+.react-flow__background pattern circle {
+  fill: #2a2a2a;
+}
+
+/* Edge styles */
+.react-flow__edge-path {
+  stroke: #00d4b4;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px rgba(0, 212, 180, 0.5));
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #00d4b4;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(0, 212, 180, 0.8));
+}
+
+.react-flow__edge-interaction {
+  stroke: transparent;
+  stroke-width: 20;
+}
+
+/* Handle styles */
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #00d4b4;
+  background: #0d0d0d;
+  transition: all 0.15s ease;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.4);
+  background: #00d4b4;
+}
+
+.react-flow__handle-connecting {
+  background: #00d4b4;
+}
+
+/* Node selection */
+.react-flow__node.selected > div {
+  border-color: #00d4b4 !important;
+  box-shadow: 0 0 0 1px #00d4b4, 0 0 20px rgba(0, 212, 180, 0.3) !important;
+}
+
+/* Controls */
+.react-flow__controls {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.react-flow__controls-button {
+  background: #161616;
+  border: none;
+  border-bottom: 1px solid #2a2a2a;
+  color: #9ca3af;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  transition: all 0.15s ease;
+}
+
+.react-flow__controls-button:hover {
+  background: #222;
+  color: #00d4b4;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+  width: 12px;
+  height: 12px;
+}
+
+/* MiniMap */
+.react-flow__minimap {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.5);
+}
+
+/* Connection line */
+.react-flow__connectionline {
+  stroke: #00d4b4;
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+/* Attribution */
+.react-flow__attribution {
+  display: none;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* Node base */
+.gs-node {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+  min-width: 240px;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gs-node:hover {
+  border-color: #3a3a3a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.gs-node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+  cursor: grab;
+  user-select: none;
+}
+
+.gs-node-header:active {
+  cursor: grabbing;
+}
+
+.gs-node-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gs-node-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.gs-node-body {
+  padding: 12px 14px;
+}
+
+/* Textarea */
+.gs-textarea {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.gs-textarea:focus {
+  border-color: #00d4b4;
+  box-shadow: 0 0 0 2px rgba(0, 212, 180, 0.1);
+}
+
+.gs-textarea::placeholder {
+  color: #4b5563;
+}
+
+/* Input */
+.gs-input {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.gs-input:focus {
+  border-color: #00d4b4;
+  box-shadow: 0 0 0 2px rgba(0, 212, 180, 0.1);
+}
+
+.gs-input::placeholder {
+  color: #4b5563;
+}
+
+/* Button */
+.gs-btn {
+  background: #00d4b4;
+  color: #0d0d0d;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gs-btn:hover {
+  background: #00e8c6;
+  box-shadow: 0 0 12px rgba(0, 212, 180, 0.4);
+}
+
+.gs-btn:active {
+  background: #00b89a;
+}
+
+.gs-btn:disabled {
+  background: #2a2a2a;
+  color: #6b7280;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.gs-btn-ghost {
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gs-btn-ghost:hover {
+  background: #222;
+  color: #e5e5e5;
+  border-color: #3a3a3a;
+}
+
+/* Label */
+.gs-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Handle label */
+.handle-label {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* Streaming output */
+.gs-output {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 8px 10px;
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.gs-output.streaming {
+  border-color: #00d4b4;
+  box-shadow: 0 0 0 2px rgba(0, 212, 180, 0.1);
+}
+
+/* Cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '▋';
+  color: #00d4b4;
+  animation: blink 1s step-start infinite;
+}
+
+/* Select */
+.gs-select {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.gs-select:focus {
+  border-color: #00d4b4;
+}
+
+.gs-select option {
+  background: #161616;
+}
+
+/* Divider */
+.gs-divider {
+  border: none;
+  border-top: 1px solid #2a2a2a;
+  margin: 12px 0;
+}

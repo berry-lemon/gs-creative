@@ -7,7 +7,7 @@ interface TextNodeData {
 }
 
 function TextNode({ id, data }: NodeProps) {
-  const nodeData = data as TextNodeData
+  const nodeData = data as unknown as TextNodeData
   const updateNodeData = useStore((s) => s.updateNodeData)
 
   const handleChange = useCallback(

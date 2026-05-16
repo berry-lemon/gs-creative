@@ -50,6 +50,7 @@ interface StoreState {
   apiKey: string
   settingsOpen: boolean
   theme: 'dark' | 'light'
+  gradientEnabled: boolean
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
@@ -59,6 +60,7 @@ interface StoreState {
   setApiKey: (key: string) => void
   toggleSettings: () => void
   toggleTheme: () => void
+  toggleGradient: () => void
   exportCanvas: () => void
   importCanvas: (jsonStr: string) => void
   getShareUrl: () => void
@@ -73,6 +75,7 @@ export const useStore = create<StoreState>()(
       apiKey: '',
       settingsOpen: false,
       theme: 'dark' as const,
+      gradientEnabled: true,
 
       onNodesChange: (changes) => {
         set((state) => ({
@@ -141,6 +144,10 @@ export const useStore = create<StoreState>()(
         })
       },
 
+      toggleGradient: () => {
+        set((state) => ({ gradientEnabled: !state.gradientEnabled }))
+      },
+
       exportCanvas: () => {
         const { nodes, edges } = get()
         downloadJson({ nodes, edges })
@@ -182,6 +189,7 @@ export const useStore = create<StoreState>()(
         edges: state.edges,
         apiKey: state.apiKey,
         theme: state.theme,
+        gradientEnabled: state.gradientEnabled,
       }),
     }
   )

@@ -1,15 +1,17 @@
 import { useRef } from 'react'
-import { Settings, Download, Upload, Share2, Sun, Moon, Sparkles } from 'lucide-react'
+import { Settings, Download, Upload, Share2, Sun, Moon, Sparkles, Waves } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 export default function TopBar() {
-  const exportCanvas  = useStore((s) => s.exportCanvas)
-  const importCanvas  = useStore((s) => s.importCanvas)
-  const getShareUrl   = useStore((s) => s.getShareUrl)
-  const toggleSettings = useStore((s) => s.toggleSettings)
-  const toggleTheme   = useStore((s) => s.toggleTheme)
-  const theme         = useStore((s) => s.theme)
-  const fileInputRef  = useRef<HTMLInputElement>(null)
+  const exportCanvas    = useStore((s) => s.exportCanvas)
+  const importCanvas    = useStore((s) => s.importCanvas)
+  const getShareUrl     = useStore((s) => s.getShareUrl)
+  const toggleSettings  = useStore((s) => s.toggleSettings)
+  const toggleTheme     = useStore((s) => s.toggleTheme)
+  const toggleGradient  = useStore((s) => s.toggleGradient)
+  const theme           = useStore((s) => s.theme)
+  const gradientEnabled = useStore((s) => s.gradientEnabled)
+  const fileInputRef    = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -66,6 +68,24 @@ export default function TopBar() {
         <TbBtn onClick={getShareUrl} icon={<Share2 size={12} />} label="Share" title="Copy shareable URL to clipboard" accent />
 
         <div style={{ width: 1, height: 22, background: 'var(--border-base)', margin: '0 4px' }} />
+
+        {/* Gradient toggle */}
+        <button
+          onClick={toggleGradient}
+          title={gradientEnabled ? 'Hide animated background' : 'Show animated background'}
+          style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: gradientEnabled ? 'var(--accent-bg)' : 'transparent',
+            border: `1px solid ${gradientEnabled ? 'var(--border-hi)' : 'var(--border-base)'}`,
+            color: gradientEnabled ? 'var(--accent)' : 'var(--text-muted)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.12s',
+            boxShadow: gradientEnabled ? '0 0 8px var(--accent-glow)' : 'none',
+          }}
+        >
+          <Waves size={13} />
+        </button>
 
         {/* Theme toggle */}
         <button

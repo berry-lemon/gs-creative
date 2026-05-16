@@ -25,13 +25,14 @@ const NODE_COLORS: Record<string, string> = {
 }
 
 export default function Canvas() {
-  const nodes         = useStore((s) => s.nodes)
-  const edges         = useStore((s) => s.edges)
-  const theme         = useStore((s) => s.theme)
-  const onNodesChange = useStore((s) => s.onNodesChange)
-  const onEdgesChange = useStore((s) => s.onEdgesChange)
-  const onConnect     = useStore((s) => s.onConnect)
-  const loadFromUrl   = useStore((s) => s.loadFromUrl)
+  const nodes           = useStore((s) => s.nodes)
+  const edges           = useStore((s) => s.edges)
+  const theme           = useStore((s) => s.theme)
+  const gradientEnabled = useStore((s) => s.gradientEnabled)
+  const onNodesChange   = useStore((s) => s.onNodesChange)
+  const onEdgesChange   = useStore((s) => s.onEdgesChange)
+  const onConnect       = useStore((s) => s.onConnect)
+  const loadFromUrl     = useStore((s) => s.loadFromUrl)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -58,7 +59,7 @@ export default function Canvas() {
   return (
     // Outer wrapper: NodeToolbar and TopBar sit HERE, as siblings of ReactFlow.
     // This prevents them from intercepting mouseup events during node drags.
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'var(--bg-canvas)' }}>
 
       {/* NodeToolbar and TopBar are OUTSIDE ReactFlow so pointer events during
           drag don't get swallowed by these panels */}
@@ -67,6 +68,14 @@ export default function Canvas() {
 
       {/* ReactFlow fills the space left after toolbar/topbar */}
       <div style={{ position: 'absolute', inset: 0, paddingLeft: 58, paddingTop: 48 }}>
+        {/* Animated gradient blobs sit BEHIND ReactFlow nodes but above its bg */}
+        {gradientEnabled && (
+          <div className="gradient-bg" aria-hidden="true">
+            <div className="blob blob-1" />
+            <div className="blob blob-2" />
+            <div className="blob blob-3" />
+          </div>
+        )}
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -83,7 +92,7 @@ export default function Canvas() {
             animated: true,
             style: { stroke: 'var(--edge-color)', strokeWidth: 2 },
           }}
-          style={{ background: 'var(--bg-canvas)' }}
+          style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
           minZoom={0.05}
           maxZoom={3}
         >

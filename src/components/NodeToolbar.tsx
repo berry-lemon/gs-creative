@@ -54,11 +54,11 @@ export default function NodeToolbar() {
         zIndex: 10,
       }}
     >
-      {/* Logo mark */}
+      {/* Bold G logo */}
       <div
         style={{
-          width: 34,
-          height: 34,
+          width: 38,
+          height: 38,
           borderRadius: 10,
           background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)',
           display: 'flex',
@@ -66,10 +66,19 @@ export default function NodeToolbar() {
           justifyContent: 'center',
           marginBottom: 10,
           flexShrink: 0,
-          boxShadow: '0 0 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3)',
+          boxShadow: '0 0 18px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.25)',
+          fontFamily: 'var(--font-display)',
+          fontWeight: 900,
+          fontSize: 22,
+          lineHeight: 1,
+          color: '#040a02',
+          letterSpacing: '-0.04em',
+          textShadow: '0 1px 0 rgba(255,255,255,0.3)',
+          userSelect: 'none',
         }}
+        title="GS Creative Studio"
       >
-        <Sparkles size={14} color="#040a02" />
+        G
       </div>
 
       <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4 }} />

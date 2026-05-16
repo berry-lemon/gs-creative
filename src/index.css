@@ -88,8 +88,8 @@ html, body, #root {
 }
 
 /* ── ReactFlow canvas ───────────────────────────────────── */
-.react-flow { background: var(--bg-canvas) !important; }
-.react-flow__background { background: var(--bg-canvas) !important; }
+.react-flow { background: transparent !important; }
+.react-flow__background { background: transparent !important; }
 .react-flow__background pattern circle { fill: var(--border-base); }
 .react-flow__attribution { display: none !important; }
 
@@ -424,6 +424,58 @@ html, body, #root {
   50%       { box-shadow: var(--node-bevel), var(--node-shadow-hover); }
 }
 .gs-node.generating { animation: pulse-glow 2s ease infinite; }
+
+/* ── Gradient background blobs ─────────────────────────── */
+.gradient-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.gradient-bg .blob {
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.35;
+  will-change: transform;
+}
+[data-theme="light"] .gradient-bg .blob { opacity: 0.45; }
+.gradient-bg .blob-1 {
+  background: var(--accent);
+  animation: blob-drift-1 32s ease-in-out infinite alternate;
+  top: -20%; left: -15%;
+}
+.gradient-bg .blob-2 {
+  background: #a78bfa;
+  animation: blob-drift-2 38s ease-in-out infinite alternate;
+  top: 30%; right: -20%;
+}
+.gradient-bg .blob-3 {
+  background: #f59e0b;
+  animation: blob-drift-3 44s ease-in-out infinite alternate;
+  bottom: -25%; left: 25%;
+}
+[data-theme="light"] .gradient-bg .blob-1 { background: #6bcf3f; }
+[data-theme="light"] .gradient-bg .blob-2 { background: #b89ffc; }
+[data-theme="light"] .gradient-bg .blob-3 { background: #ffb84d; }
+
+@keyframes blob-drift-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40vw, 30vh) scale(1.25); }
+}
+@keyframes blob-drift-2 {
+  0%   { transform: translate(0, 0) scale(1.1); }
+  100% { transform: translate(-35vw, 20vh) scale(0.85); }
+}
+@keyframes blob-drift-3 {
+  0%   { transform: translate(0, 0) scale(0.95); }
+  100% { transform: translate(20vw, -40vh) scale(1.35); }
+}
 
 /* ── Scrollbars ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }

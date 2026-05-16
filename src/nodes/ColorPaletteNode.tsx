@@ -1,182 +1,118 @@
 import { memo, useCallback, useRef } from 'react'
-import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Position, type NodeProps } from '@xyflow/react'
 import { Plus, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import NodeWrapper from '../components/NodeWrapper'
+import TooltipHandle from '../components/TooltipHandle'
 
-interface ColorPaletteNodeData {
-  colors: string[]
-}
+interface ColorPaletteData { colors: string[] }
 
 function ColorPaletteNode({ id, data }: NodeProps) {
-  const nodeData = data as unknown as ColorPaletteNodeData
+  const { colors } = data as unknown as ColorPaletteData
   const updateNodeData = useStore((s) => s.updateNodeData)
-  const colorInputRef = useRef<HTMLInputElement>(null)
-  const editingIndexRef = useRef<number>(-1)
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([])
+
+  const updateColor = useCallback(
+    (index: number, value: string) => {
+      const next = [...colors]
+      next[index] = value
+      updateNodeData(id, { colors: next })
+    },
+    [id, colors, updateNodeData]
+  )
 
   const addColor = useCallback(() => {
-    const newColors = [...nodeData.colors, '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')]
-    updateNodeData(id, { colors: newColors })
-  }, [id, nodeData.colors, updateNodeData])
+    if (colors.length >= 10) return
+    updateNodeData(id, { colors: [...colors, '#76ff03'] })
+  }, [id, colors, updateNodeData])
 
   const removeColor = useCallback(
     (index: number) => {
-      const newColors = nodeData.colors.filter((_, i) => i !== index)
-      updateNodeData(id, { colors: newColors.length > 0 ? newColors : ['#00d4b4'] })
+      const next = colors.filter((_, i) => i !== index)
+      updateNodeData(id, { colors: next })
     },
-    [id, nodeData.colors, updateNodeData]
-  )
-
-  const openColorPicker = useCallback(
-    (index: number) => {
-      editingIndexRef.current = index
-      if (colorInputRef.current) {
-        colorInputRef.current.value = nodeData.colors[index] ?? '#000000'
-        colorInputRef.current.click()
-      }
-    },
-    [nodeData.colors]
-  )
-
-  const handleColorChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const idx = editingIndexRef.current
-      if (idx < 0) return
-      const newColors = [...nodeData.colors]
-      newColors[idx] = e.target.value
-      updateNodeData(id, { colors: newColors })
-    },
-    [id, nodeData.colors, updateNodeData]
+    [id, colors, updateNodeData]
   )
 
   return (
-    <div className="gs-node" style={{ minWidth: 260 }}>
-      <div className="gs-node-header">
-        <div className="gs-node-dot" style={{ background: '#f59e0b' }} />
-        <span className="gs-node-title">Color Palette</span>
-      </div>
-      <div className="gs-node-body">
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 8,
-            alignItems: 'center',
-          }}
-        >
-          {nodeData.colors.map((color, index) => (
+    <NodeWrapper id={id} label="Palette" dotColor="#f59e0b" tooltip="Color palette — defines brand colors, wired to Gemini for context">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+        {colors.map((color, i) => (
+          <div key={i} style={{ position: 'relative' }}>
             <div
-              key={index}
-              style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
+              onClick={() => inputRefs.current[i]?.click()}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: color,
+                cursor: 'pointer',
+                border: '2px solid rgba(255,255,255,0.12)',
+                boxShadow: `0 0 8px ${color}55`,
+                transition: 'transform 0.12s',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.12)' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)' }}
+              title={color}
+            />
+            <input
+              ref={(el) => { inputRefs.current[i] = el }}
+              type="color"
+              value={color}
+              onChange={(e) => updateColor(i, e.target.value)}
+              style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+            />
+            <button
+              onClick={() => removeColor(i)}
+              style={{
+                position: 'absolute', top: -6, right: -6,
+                width: 14, height: 14, borderRadius: '50%',
+                background: 'var(--bg-node)', border: '1px solid var(--border-base)',
+                color: 'var(--text-muted)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0, fontSize: 9,
+              }}
+              title="Remove"
             >
-              <div style={{ position: 'relative' }}>
-                <div
-                  onClick={() => openColorPicker(index)}
-                  title={color}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    background: color,
-                    cursor: 'pointer',
-                    border: '2px solid #2a2a2a',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                    transition: 'transform 0.1s ease, border-color 0.1s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    ;(e.currentTarget as HTMLDivElement).style.transform = 'scale(1.1)'
-                    ;(e.currentTarget as HTMLDivElement).style.borderColor = '#4a4a4a'
-                  }}
-                  onMouseLeave={(e) => {
-                    ;(e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'
-                    ;(e.currentTarget as HTMLDivElement).style.borderColor = '#2a2a2a'
-                  }}
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeColor(index)
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: -6,
-                    right: -6,
-                    width: 16,
-                    height: 16,
-                    borderRadius: '50%',
-                    background: '#1a1a1a',
-                    border: '1px solid #3a3a3a',
-                    color: '#9ca3af',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    opacity: 0,
-                    transition: 'opacity 0.15s ease',
-                  }}
-                  className="color-remove-btn"
-                >
-                  <X size={8} />
-                </button>
-              </div>
-              <span
-                style={{
-                  fontSize: 9,
-                  color: '#6b7280',
-                  fontFamily: 'monospace',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {color.toUpperCase()}
-              </span>
-            </div>
-          ))}
+              <X size={8} />
+            </button>
+          </div>
+        ))}
+        {colors.length < 10 && (
           <button
             onClick={addColor}
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              background: '#0d0d0d',
-              border: '2px dashed #2a2a2a',
-              color: '#4b5563',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.15s ease',
+              width: 36, height: 36, borderRadius: 8,
+              background: 'var(--bg-display)', border: '1px dashed var(--border-base)',
+              color: 'var(--text-muted)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'border-color 0.12s, color 0.12s',
             }}
             onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#f59e0b'
-              ;(e.currentTarget as HTMLButtonElement).style.color = '#f59e0b'
+              ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent)'
+              ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)'
             }}
             onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#2a2a2a'
-              ;(e.currentTarget as HTMLButtonElement).style.color = '#4b5563'
+              ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-base)'
+              ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'
             }}
+            title="Add color"
           >
-            <Plus size={16} />
+            <Plus size={14} />
           </button>
-        </div>
-        <input
-          ref={colorInputRef}
-          type="color"
-          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
-          onChange={handleColorChange}
-        />
-        <style>{`
-          .gs-node:hover .color-remove-btn {
-            opacity: 1 !important;
-          }
-        `}</style>
+        )}
       </div>
-      <Handle
+      <p style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+        {colors.length} color{colors.length !== 1 ? 's' : ''} · click swatch to edit
+      </p>
+      <TooltipHandle
         type="source"
         position={Position.Right}
         id="palette-output"
-        style={{ background: '#0d0d0d', borderColor: '#f59e0b' }}
+        tooltip="Colors (JSON array)"
+        style={{ borderColor: '#f59e0b' }}
       />
-    </div>
+    </NodeWrapper>
   )
 }
 

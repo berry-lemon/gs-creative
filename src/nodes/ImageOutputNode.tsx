@@ -1,97 +1,71 @@
 import { memo } from 'react'
-import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react'
-import { Monitor, ImageOff } from 'lucide-react'
+import { Position, type NodeProps, useReactFlow } from '@xyflow/react'
+import { ImageOff } from 'lucide-react'
+import NodeWrapper from '../components/NodeWrapper'
+import TooltipHandle from '../components/TooltipHandle'
 
-interface ImageNodeData {
-  base64: string
-  mimeType: string
-  fileName: string
-}
+interface ImageNodeData { base64: string; mimeType: string }
 
-function ImageOutputNode({ id }: NodeProps) {
+function ImageOutputNode({ id, data }: NodeProps) {
+  const nodeData = data as unknown as ImageNodeData
   const { getEdges, getNode } = useReactFlow()
 
-  // Dynamically read connected image source
   const edges = getEdges()
-  const incomingEdge = edges.find((e) => e.target === id)
-  let imageSrc = ''
-  let fileName = ''
+  const incoming = edges.find((e) => e.target === id)
+  let src = nodeData.base64 || ''
 
-  if (incomingEdge) {
-    const sourceNode = getNode(incomingEdge.source)
+  if (incoming) {
+    const sourceNode = getNode(incoming.source)
     if (sourceNode) {
-      const d = sourceNode.data as unknown as ImageNodeData
-      if (d.base64) {
-        imageSrc = d.base64
-        fileName = d.fileName || ''
-      }
+      const sd = sourceNode.data as unknown as ImageNodeData
+      if (sd?.base64) src = sd.base64
     }
   }
 
   return (
-    <div className="gs-node" style={{ minWidth: 280 }}>
-      <div className="gs-node-header">
-        <div className="gs-node-dot" style={{ background: '#6366f1' }} />
-        <Monitor size={12} color="#9ca3af" />
-        <span className="gs-node-title">Image Output</span>
-      </div>
-      <div className="gs-node-body">
-        {imageSrc ? (
-          <div>
-            <img
-              src={imageSrc}
-              alt={fileName || 'output'}
-              style={{
-                width: '100%',
-                borderRadius: 8,
-                display: 'block',
-                border: '1px solid #2a2a2a',
-                maxHeight: 320,
-                objectFit: 'contain',
-                background: '#0d0d0d',
-              }}
-            />
-            {fileName && (
-              <p
-                style={{
-                  margin: '8px 0 0',
-                  fontSize: 10,
-                  color: '#6b7280',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {fileName}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div
-            style={{
-              border: '2px dashed #2a2a2a',
-              borderRadius: 8,
-              padding: '32px 16px',
-              textAlign: 'center',
-              background: '#0d0d0d',
-            }}
-          >
-            <ImageOff size={24} color="#2a2a2a" style={{ margin: '0 auto 8px' }} />
-            <p style={{ margin: 0, fontSize: 12, color: '#4b5563', lineHeight: 1.5 }}>
-              Connect an image source
-              <br />
-              <span style={{ fontSize: 10, color: '#3a3a3a' }}>ImageUpload or Logo node</span>
-            </p>
-          </div>
-        )}
-      </div>
-      <Handle
+    <NodeWrapper id={id} label="Output" dotColor="#6366f1" tooltip="Displays an image piped from an upstream image node" minWidth={280}>
+      <TooltipHandle
         type="target"
         position={Position.Left}
         id="image-input"
-        style={{ background: '#0d0d0d', borderColor: '#6366f1' }}
+        tooltip="Image input"
+        style={{ borderColor: '#6366f1' }}
       />
-    </div>
+      {src ? (
+        <img
+          src={src}
+          alt="Output"
+          style={{
+            width: '100%',
+            borderRadius: 8,
+            display: 'block',
+            maxHeight: 320,
+            objectFit: 'contain',
+            background: 'var(--bg-display)',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            background: 'var(--bg-display)',
+            border: '1px dashed var(--border-base)',
+            borderRadius: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            minHeight: 160,
+            color: 'var(--text-dim)',
+          }}
+        >
+          <ImageOff size={28} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Connect an image node
+          </span>
+        </div>
+      )}
+    </NodeWrapper>
   )
 }
 

@@ -49,13 +49,16 @@ interface StoreState {
   edges: Edge[]
   apiKey: string
   settingsOpen: boolean
+  theme: 'dark' | 'light'
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   onConnect: (connection: Connection) => void
   addNode: (type: string, position: { x: number; y: number }) => void
   updateNodeData: (id: string, data: Record<string, unknown>) => void
+  deleteNode: (id: string) => void
   setApiKey: (key: string) => void
   toggleSettings: () => void
+  toggleTheme: () => void
   exportCanvas: () => void
   importCanvas: (jsonStr: string) => void
   getShareUrl: () => void
@@ -69,6 +72,7 @@ export const useStore = create<StoreState>()(
       edges: [],
       apiKey: '',
       settingsOpen: false,
+      theme: 'dark' as const,
 
       onNodesChange: (changes) => {
         set((state) => ({
@@ -114,12 +118,27 @@ export const useStore = create<StoreState>()(
         }))
       },
 
+      deleteNode: (id) => {
+        set((state) => ({
+          nodes: state.nodes.filter((n) => n.id !== id),
+          edges: state.edges.filter((e) => e.source !== id && e.target !== id),
+        }))
+      },
+
       setApiKey: (key) => {
         set({ apiKey: key })
       },
 
       toggleSettings: () => {
         set((state) => ({ settingsOpen: !state.settingsOpen }))
+      },
+
+      toggleTheme: () => {
+        set((state) => {
+          const next = state.theme === 'dark' ? 'light' : 'dark'
+          document.documentElement.setAttribute('data-theme', next)
+          return { theme: next }
+        })
       },
 
       exportCanvas: () => {
@@ -162,6 +181,7 @@ export const useStore = create<StoreState>()(
         nodes: state.nodes,
         edges: state.edges,
         apiKey: state.apiKey,
+        theme: state.theme,
       }),
     }
   )

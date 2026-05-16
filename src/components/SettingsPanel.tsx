@@ -1,29 +1,20 @@
 import { useState, useCallback } from 'react'
-import { Eye, EyeOff, X, Key, ExternalLink } from 'lucide-react'
+import { Eye, EyeOff, X, ExternalLink } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 export default function SettingsPanel() {
-  const settingsOpen = useStore((s) => s.settingsOpen)
+  const settingsOpen   = useStore((s) => s.settingsOpen)
+  const apiKey         = useStore((s) => s.apiKey)
+  const setApiKey      = useStore((s) => s.setApiKey)
   const toggleSettings = useStore((s) => s.toggleSettings)
-  const apiKey = useStore((s) => s.apiKey)
-  const setApiKey = useStore((s) => s.setApiKey)
 
-  const [localKey, setLocalKey] = useState(apiKey)
-  const [showKey, setShowKey] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [draft, setDraft] = useState(apiKey)
+  const [show, setShow]   = useState(false)
 
-  const handleSave = useCallback(() => {
-    setApiKey(localKey.trim())
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }, [localKey, setApiKey])
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') handleSave()
-    },
-    [handleSave]
-  )
+  const save = useCallback(() => {
+    setApiKey(draft.trim())
+    toggleSettings()
+  }, [draft, setApiKey, toggleSettings])
 
   if (!settingsOpen) return null
 
@@ -32,29 +23,22 @@ export default function SettingsPanel() {
       {/* Backdrop */}
       <div
         onClick={toggleSettings}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          zIndex: 50,
-          backdropFilter: 'blur(2px)',
-        }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 49, backdropFilter: 'blur(2px)' }}
       />
 
       {/* Panel */}
       <div
         style={{
           position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 320,
-          background: '#111111',
-          borderLeft: '1px solid #1e1e1e',
-          zIndex: 51,
+          top: 0, right: 0, bottom: 0,
+          width: 340,
+          background: 'var(--bg-surface)',
+          borderLeft: '1px solid var(--border-base)',
+          boxShadow: 'var(--node-bevel), -8px 0 40px rgba(0,0,0,0.5)',
+          zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-8px 0 40px rgba(0,0,0,0.5)',
+          overflowY: 'auto',
         }}
       >
         {/* Header */}
@@ -62,238 +46,122 @@ export default function SettingsPanel() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 20px',
-            borderBottom: '1px solid #1e1e1e',
+            gap: 10,
+            padding: '14px 20px',
+            borderBottom: '1px solid var(--border-base)',
+            background: 'linear-gradient(90deg, var(--accent-bg) 0%, transparent 100%)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Key size={15} color="#00d4b4" />
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 15,
-                fontWeight: 600,
-                color: '#e5e5e5',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Settings
-            </h2>
-          </div>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-primary)', flex: 1 }}>
+            Settings
+          </span>
           <button
             onClick={toggleSettings}
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 7,
-              background: 'transparent',
-              border: '1px solid #2a2a2a',
-              color: '#6b7280',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background = '#1e1e1e'
-              ;(e.currentTarget as HTMLButtonElement).style.color = '#e5e5e5'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
-              ;(e.currentTarget as HTMLButtonElement).style.color = '#6b7280'
-            }}
+            style={{ width: 26, height: 26, borderRadius: '50%', background: 'transparent', border: '1px solid var(--border-base)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.12s' }}
+            onMouseEnter={(e) => { (e.currentTarget).style.borderColor = '#ff5555'; (e.currentTarget).style.color = '#ff5555' }}
+            onMouseLeave={(e) => { (e.currentTarget).style.borderColor = 'var(--border-base)'; (e.currentTarget).style.color = 'var(--text-muted)' }}
           >
-            <X size={13} />
+            <X size={12} />
           </button>
         </div>
 
-        {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+        <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* API Key section */}
-          <div
-            style={{
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 16,
-            }}
-          >
-            <h3
-              style={{
-                margin: '0 0 6px',
-                fontSize: 13,
-                fontWeight: 600,
-                color: '#e5e5e5',
-              }}
-            >
-              Gemini API Key
-            </h3>
-            <p style={{ margin: '0 0 14px', fontSize: 12, color: '#6b7280', lineHeight: 1.6 }}>
-              Required for the Gemini node to generate text. Your key is stored locally in your
-              browser and never sent to our servers.
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 5px #f59e0b' }} />
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+                Gemini API Key
+              </span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+              Required for the Gemini node. Keys are stored only in your browser's local storage and sent directly to Google's API.
             </p>
 
-            <label
-              style={{
-                display: 'block',
-                fontSize: 10,
-                fontWeight: 500,
-                color: '#6b7280',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                marginBottom: 6,
-              }}
-            >
-              API Key
-            </label>
-
-            <div style={{ position: 'relative', marginBottom: 12 }}>
-              <input
-                type={showKey ? 'text' : 'password'}
-                value={localKey}
-                onChange={(e) => {
-                  setLocalKey(e.target.value)
-                  setSaved(false)
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="AIza..."
-                style={{
-                  width: '100%',
-                  background: '#0d0d0d',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: 8,
-                  color: '#e5e5e5',
-                  fontFamily: 'Inter, monospace',
-                  fontSize: 12,
-                  padding: '8px 36px 8px 10px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'border-color 0.15s ease',
-                }}
-                onFocus={(e) => {
-                  ;(e.currentTarget as HTMLInputElement).style.borderColor = '#00d4b4'
-                  ;(e.currentTarget as HTMLInputElement).style.boxShadow =
-                    '0 0 0 2px rgba(0,212,180,0.1)'
-                }}
-                onBlur={(e) => {
-                  ;(e.currentTarget as HTMLInputElement).style.borderColor = '#2a2a2a'
-                  ;(e.currentTarget as HTMLInputElement).style.boxShadow = 'none'
-                }}
-              />
-              <button
-                onClick={() => setShowKey((v) => !v)}
-                style={{
-                  position: 'absolute',
-                  right: 10,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#6b7280',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: 0,
-                  transition: 'color 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#e5e5e5'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#6b7280'
-                }}
-              >
-                {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+            <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <input
+                  className="gs-input"
+                  type={show ? 'text' : 'password'}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') save() }}
+                  placeholder="AIza…"
+                  style={{ paddingRight: 36 }}
+                />
+                <button
+                  onClick={() => setShow((v) => !v)}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
+                  title={show ? 'Hide key' : 'Show key'}
+                >
+                  {show ? <EyeOff size={13} /> : <Eye size={13} />}
+                </button>
+              </div>
+              <button className="gs-btn" onClick={save} style={{ flexShrink: 0 }}>
+                Save
               </button>
             </div>
 
-            <button
-              onClick={handleSave}
-              style={{
-                width: '100%',
-                height: 36,
-                borderRadius: 8,
-                background: saved ? 'rgba(16, 185, 129, 0.2)' : '#00d4b4',
-                border: saved ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
-                color: saved ? '#10b981' : '#0d0d0d',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {saved ? 'Saved!' : 'Save API Key'}
-            </button>
-          </div>
+            {apiKey && (
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 5px var(--accent)' }} />
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 8, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  Key stored
+                </span>
+              </div>
+            )}
+          </section>
 
-          {/* Get API key link */}
-          <div
-            style={{
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: 12,
-              padding: 14,
-              marginBottom: 16,
-            }}
-          >
-            <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9ca3af', lineHeight: 1.6 }}>
-              Don't have an API key? Get one free from Google AI Studio.
+          <hr className="gs-divider" />
+
+          {/* Help */}
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 5px #6366f1' }} />
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+                Get a Key
+              </span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>
+              Get a free Gemini API key from Google AI Studio. The free tier supports Gemini 2.0 Flash with generous limits.
             </p>
             <a
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#00d4b4',
-                textDecoration: 'none',
-                transition: 'opacity 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.opacity = '0.7'
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.opacity = '1'
-              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', textDecoration: 'none' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.textShadow = '0 0 8px var(--accent)' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.textShadow = 'none' }}
             >
-              <ExternalLink size={12} />
-              Google AI Studio
+              Google AI Studio <ExternalLink size={10} />
             </a>
-          </div>
+          </section>
 
-          {/* About */}
-          <div
-            style={{
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: 12,
-              padding: 14,
-            }}
-          >
-            <h3
-              style={{
-                margin: '0 0 8px',
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#9ca3af',
-              }}
-            >
-              About GS Creative Studio
-            </h3>
-            <p style={{ margin: 0, fontSize: 11, color: '#4b5563', lineHeight: 1.7 }}>
-              A visual AI node editor for creative workflows. Connect text prompts, images, logos,
-              and fonts to Gemini AI to generate creative content. Export your canvas as JSON or
-              share via URL.
-            </p>
-          </div>
+          <hr className="gs-divider" />
+
+          {/* Keyboard shortcuts */}
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 5px #10b981' }} />
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+                Shortcuts
+              </span>
+            </div>
+            {[
+              ['Delete / Backspace', 'Remove selected node or edge'],
+              ['Scroll', 'Zoom in / out'],
+              ['Space + drag', 'Pan canvas'],
+              ['Ctrl + Z', 'Undo node changes'],
+            ].map(([key, desc]) => (
+              <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 8, letterSpacing: '0.08em', color: 'var(--text-muted)' }}>{desc}</span>
+                <kbd style={{ fontFamily: 'var(--font-mono)', fontSize: 9, background: 'var(--bg-display)', border: '1px solid var(--border-base)', borderRadius: 4, padding: '2px 6px', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                  {key}
+                </kbd>
+              </div>
+            ))}
+          </section>
         </div>
       </div>
     </>

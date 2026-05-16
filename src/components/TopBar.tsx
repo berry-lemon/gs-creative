@@ -1,28 +1,22 @@
 import { useRef } from 'react'
-import { Settings, Download, Upload, Share2, Sparkles } from 'lucide-react'
+import { Settings, Download, Upload, Share2, Sun, Moon, Sparkles } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 export default function TopBar() {
-  const exportCanvas = useStore((s) => s.exportCanvas)
-  const importCanvas = useStore((s) => s.importCanvas)
-  const getShareUrl = useStore((s) => s.getShareUrl)
+  const exportCanvas  = useStore((s) => s.exportCanvas)
+  const importCanvas  = useStore((s) => s.importCanvas)
+  const getShareUrl   = useStore((s) => s.getShareUrl)
   const toggleSettings = useStore((s) => s.toggleSettings)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
+  const toggleTheme   = useStore((s) => s.toggleTheme)
+  const theme         = useStore((s) => s.theme)
+  const fileInputRef  = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string
-      importCanvas(text)
-    }
+    reader.onload = (ev) => importCanvas(ev.target?.result as string)
     reader.readAsText(file)
-    // Reset so same file can be re-imported
     e.target.value = ''
   }
 
@@ -30,12 +24,11 @@ export default function TopBar() {
     <div
       style={{
         position: 'absolute',
-        top: 0,
-        left: 56,
-        right: 0,
+        top: 0, left: 58, right: 0,
         height: 48,
-        background: '#111111',
-        borderBottom: '1px solid #1e1e1e',
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border-base)',
+        boxShadow: 'inset 0 -1px 0 var(--border-hi)',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: 16,
@@ -44,144 +37,105 @@ export default function TopBar() {
         zIndex: 10,
       }}
     >
-      {/* App name */}
+      {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <Sparkles size={14} color="#00d4b4" />
-          <span
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: '#e5e5e5',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            GS Creative
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 500,
-              color: '#00d4b4',
-              background: 'rgba(0, 212, 180, 0.1)',
-              border: '1px solid rgba(0, 212, 180, 0.2)',
-              borderRadius: 4,
-              padding: '1px 6px',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Studio
-          </span>
-        </div>
+        <Sparkles size={13} style={{ color: 'var(--accent)' }} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+          GS Creative
+        </span>
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 8,
+          fontWeight: 700,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'var(--accent)',
+          background: 'var(--accent-bg)',
+          border: '1px solid var(--border-hi)',
+          borderRadius: 4,
+          padding: '2px 7px',
+        }}>
+          Studio
+        </span>
       </div>
 
-      {/* Action buttons */}
+      {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <TopBarButton onClick={exportCanvas} icon={<Download size={13} />} label="Export" />
-        <TopBarButton onClick={handleImportClick} icon={<Upload size={13} />} label="Import" />
-        <TopBarButton onClick={getShareUrl} icon={<Share2 size={13} />} label="Share" accent />
-        <div style={{ width: 1, height: 24, background: '#1e1e1e', margin: '0 4px' }} />
+        <TbBtn onClick={exportCanvas} icon={<Download size={12} />} label="Export" title="Export canvas as JSON file" />
+        <TbBtn onClick={() => fileInputRef.current?.click()} icon={<Upload size={12} />} label="Import" title="Import canvas from JSON file" />
+        <TbBtn onClick={getShareUrl} icon={<Share2 size={12} />} label="Share" title="Copy shareable URL to clipboard" accent />
+
+        <div style={{ width: 1, height: 22, background: 'var(--border-base)', margin: '0 4px' }} />
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: 'transparent',
+            border: '1px solid var(--border-base)',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.12s',
+          }}
+          onMouseEnter={(e) => { const b = e.currentTarget; b.style.background = 'var(--accent-bg)'; b.style.color = 'var(--accent)'; b.style.borderColor = 'var(--border-hi)' }}
+          onMouseLeave={(e) => { const b = e.currentTarget; b.style.background = 'transparent'; b.style.color = 'var(--text-muted)'; b.style.borderColor = 'var(--border-base)' }}
+        >
+          {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+        </button>
+
+        {/* Settings */}
         <button
           onClick={toggleSettings}
+          title="Open settings"
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
+            width: 32, height: 32, borderRadius: 8,
             background: 'transparent',
-            border: '1px solid #2a2a2a',
-            color: '#6b7280',
+            border: '1px solid var(--border-base)',
+            color: 'var(--text-muted)',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.15s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.12s',
           }}
-          onMouseEnter={(e) => {
-            ;(e.currentTarget as HTMLButtonElement).style.background = '#1e1e1e'
-            ;(e.currentTarget as HTMLButtonElement).style.color = '#e5e5e5'
-            ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#3a3a3a'
-          }}
-          onMouseLeave={(e) => {
-            ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
-            ;(e.currentTarget as HTMLButtonElement).style.color = '#6b7280'
-            ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#2a2a2a'
-          }}
-          title="Settings"
+          onMouseEnter={(e) => { const b = e.currentTarget; b.style.background = 'var(--accent-bg)'; b.style.color = 'var(--accent)'; b.style.borderColor = 'var(--border-hi)' }}
+          onMouseLeave={(e) => { const b = e.currentTarget; b.style.background = 'transparent'; b.style.color = 'var(--text-muted)'; b.style.borderColor = 'var(--border-base)' }}
         >
-          <Settings size={14} />
+          <Settings size={13} />
         </button>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
+      <input ref={fileInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
     </div>
   )
 }
 
-interface TopBarButtonProps {
-  onClick: () => void
-  icon: React.ReactNode
-  label: string
-  accent?: boolean
-}
-
-function TopBarButton({ onClick, icon, label, accent = false }: TopBarButtonProps) {
+function TbBtn({ onClick, icon, label, title, accent = false }: { onClick: () => void; icon: React.ReactNode; label: string; title: string; accent?: boolean }) {
   return (
     <button
       onClick={onClick}
+      title={title}
       style={{
-        height: 32,
+        height: 30,
         borderRadius: 8,
-        background: accent ? 'rgba(0, 212, 180, 0.1)' : 'transparent',
-        border: `1px solid ${accent ? 'rgba(0, 212, 180, 0.3)' : '#2a2a2a'}`,
-        color: accent ? '#00d4b4' : '#9ca3af',
+        background: accent ? 'var(--accent-bg)' : 'transparent',
+        border: `1px solid ${accent ? 'var(--border-hi)' : 'var(--border-base)'}`,
+        color: accent ? 'var(--accent)' : 'var(--text-muted)',
         cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
+        display: 'flex', alignItems: 'center', gap: 5,
         padding: '0 10px',
-        fontSize: 12,
-        fontWeight: 500,
-        fontFamily: 'Inter, sans-serif',
-        transition: 'all 0.15s ease',
+        fontFamily: 'var(--font-display)',
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        transition: 'all 0.12s',
       }}
-      onMouseEnter={(e) => {
-        const btn = e.currentTarget as HTMLButtonElement
-        if (accent) {
-          btn.style.background = 'rgba(0, 212, 180, 0.2)'
-          btn.style.borderColor = '#00d4b4'
-        } else {
-          btn.style.background = '#1e1e1e'
-          btn.style.color = '#e5e5e5'
-          btn.style.borderColor = '#3a3a3a'
-        }
-      }}
-      onMouseLeave={(e) => {
-        const btn = e.currentTarget as HTMLButtonElement
-        if (accent) {
-          btn.style.background = 'rgba(0, 212, 180, 0.1)'
-          btn.style.borderColor = 'rgba(0, 212, 180, 0.3)'
-        } else {
-          btn.style.background = 'transparent'
-          btn.style.color = '#9ca3af'
-          btn.style.borderColor = '#2a2a2a'
-        }
-      }}
+      onMouseEnter={(e) => { const b = e.currentTarget; b.style.background = 'var(--accent-bg-hover)'; b.style.color = 'var(--accent)'; b.style.borderColor = 'var(--border-hi)'; b.style.boxShadow = `0 0 10px var(--accent-glow)` }}
+      onMouseLeave={(e) => { const b = e.currentTarget; b.style.background = accent ? 'var(--accent-bg)' : 'transparent'; b.style.color = accent ? 'var(--accent)' : 'var(--text-muted)'; b.style.borderColor = accent ? 'var(--border-hi)' : 'var(--border-base)'; b.style.boxShadow = 'none' }}
     >
-      {icon}
-      {label}
+      {icon}{label}
     </button>
   )
 }

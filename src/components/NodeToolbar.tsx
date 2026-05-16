@@ -1,91 +1,37 @@
 import { useState, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
-import {
-  Type,
-  Image,
-  ImagePlus,
-  Palette,
-  Sparkles,
-  Monitor,
-  Baseline,
-} from 'lucide-react'
+import { Type, Image, ImagePlus, Palette, Sparkles, Monitor, Baseline } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 interface ToolItem {
   type: string
   label: string
-  icon: React.ReactNode
-  color: string
   description: string
+  icon: React.ReactNode
+  dot: string
 }
 
 const TOOLS: ToolItem[] = [
-  {
-    type: 'textNode',
-    label: 'Text',
-    icon: <Type size={18} />,
-    color: '#a78bfa',
-    description: 'Text prompt or copy',
-  },
-  {
-    type: 'imageUploadNode',
-    label: 'Image',
-    icon: <Image size={18} />,
-    color: '#f59e0b',
-    description: 'Upload an image',
-  },
-  {
-    type: 'logoNode',
-    label: 'Logo',
-    icon: <ImagePlus size={18} />,
-    color: '#ec4899',
-    description: 'Upload a logo',
-  },
-  {
-    type: 'colorPaletteNode',
-    label: 'Palette',
-    icon: <Palette size={18} />,
-    color: '#f59e0b',
-    description: 'Color palette',
-  },
-  {
-    type: 'fontNode',
-    label: 'Font',
-    icon: <Baseline size={18} />,
-    color: '#10b981',
-    description: 'Google Font selector',
-  },
-  {
-    type: 'geminiNode',
-    label: 'Gemini',
-    icon: <Sparkles size={18} />,
-    color: '#00d4b4',
-    description: 'AI text generation',
-  },
-  {
-    type: 'imageOutputNode',
-    label: 'Output',
-    icon: <Monitor size={18} />,
-    color: '#6366f1',
-    description: 'Display image output',
-  },
+  { type: 'textNode',         label: 'Text',    description: 'Prompt or copy text — wires to Gemini as input',  icon: <Type size={16} />,      dot: '#a78bfa' },
+  { type: 'imageUploadNode',  label: 'Image',   description: 'Upload an image for visual AI input',             icon: <Image size={16} />,     dot: '#f59e0b' },
+  { type: 'logoNode',         label: 'Logo',    description: 'Upload a brand logo with transparency support',   icon: <ImagePlus size={16} />, dot: '#ec4899' },
+  { type: 'colorPaletteNode', label: 'Palette', description: 'Define brand colors — click swatches to edit',   icon: <Palette size={16} />,   dot: '#f59e0b' },
+  { type: 'fontNode',         label: 'Font',    description: 'Load any Google Font with live preview',          icon: <Baseline size={16} />,  dot: '#10b981' },
+  { type: 'geminiNode',       label: 'Gemini',  description: 'AI text generation — streaming, multi-modal',    icon: <Sparkles size={16} />,  dot: 'var(--accent)' },
+  { type: 'imageOutputNode',  label: 'Output',  description: 'Display an image piped from an upstream node',   icon: <Monitor size={16} />,   dot: '#6366f1' },
 ]
 
 export default function NodeToolbar() {
   const addNode = useStore((s) => s.addNode)
   const { getViewport } = useReactFlow()
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [hovered, setHovered] = useState<number | null>(null)
 
   const handleAdd = useCallback(
     (type: string) => {
-      const viewport = getViewport()
-      // Place new node near center of current viewport
-      const x = (-viewport.x + window.innerWidth / 2 - 130) / viewport.zoom
-      const y = (-viewport.y + window.innerHeight / 2 - 80) / viewport.zoom
-      // Add small random offset so nodes don't stack
-      const jitterX = (Math.random() - 0.5) * 60
-      const jitterY = (Math.random() - 0.5) * 60
-      addNode(type, { x: x + jitterX, y: y + jitterY })
+      const vp = getViewport()
+      const x = (-vp.x + window.innerWidth / 2 - 130) / vp.zoom + (Math.random() - 0.5) * 80
+      const y = (-vp.y + window.innerHeight / 2 - 80) / vp.zoom + (Math.random() - 0.5) * 80
+      addNode(type, { x, y })
     },
     [addNode, getViewport]
   )
@@ -94,87 +40,95 @@ export default function NodeToolbar() {
     <div
       style={{
         position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 56,
-        background: '#111111',
-        borderRight: '1px solid #1e1e1e',
+        left: 0, top: 0, bottom: 0,
+        width: 58,
+        background: 'var(--bg-surface)',
+        borderRight: '1px solid var(--border-base)',
+        boxShadow: 'inset -1px 0 0 var(--border-hi)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        paddingTop: 8,
-        paddingBottom: 8,
-        gap: 2,
+        paddingTop: 10,
+        paddingBottom: 10,
+        gap: 4,
         zIndex: 10,
       }}
     >
       {/* Logo mark */}
       <div
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          background: 'linear-gradient(135deg, #00d4b4 0%, #0099ff 100%)',
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 12,
+          marginBottom: 10,
           flexShrink: 0,
-          boxShadow: '0 0 12px rgba(0, 212, 180, 0.4)',
+          boxShadow: '0 0 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3)',
         }}
       >
-        <Sparkles size={14} color="#0d0d0d" />
+        <Sparkles size={14} color="#040a02" />
       </div>
 
+      <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4 }} />
+
       {TOOLS.map((tool, index) => (
-        <div
-          key={tool.type}
-          style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}
-        >
+        <div key={tool.type} style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
           <button
             onClick={() => handleAdd(tool.type)}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-            title={tool.label}
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(null)}
             style={{
-              width: 40,
-              height: 40,
+              width: 42,
+              height: 42,
               borderRadius: 10,
-              background: hoveredIndex === index ? '#1e1e1e' : 'transparent',
-              border: `1px solid ${hoveredIndex === index ? '#2a2a2a' : 'transparent'}`,
-              color: hoveredIndex === index ? tool.color : '#6b7280',
+              background: hovered === index ? 'var(--accent-bg)' : 'transparent',
+              border: `1px solid ${hovered === index ? 'var(--border-hi)' : 'transparent'}`,
+              color: hovered === index ? tool.dot : 'var(--text-muted)',
               cursor: 'pointer',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.15s ease',
-              position: 'relative',
+              gap: 2,
+              transition: 'all 0.12s',
+              boxShadow: hovered === index ? `0 0 12px ${tool.dot}33` : 'none',
             }}
           >
             {tool.icon}
-            {hoveredIndex === index && (
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 6, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1 }}>
+              {tool.label}
+            </span>
+
+            {/* Tooltip */}
+            {hovered === index && (
               <div
                 style={{
                   position: 'absolute',
-                  left: '100%',
+                  left: 'calc(100% + 12px)',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  marginLeft: 12,
-                  background: '#1e1e1e',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: 8,
-                  padding: '6px 12px',
+                  background: 'var(--bg-node)',
+                  border: '1px solid var(--border-base)',
+                  boxShadow: 'var(--node-shadow)',
+                  borderRadius: 9,
+                  padding: '8px 12px',
                   whiteSpace: 'nowrap',
                   pointerEvents: 'none',
                   zIndex: 100,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                  minWidth: 180,
                 }}
               >
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#e5e5e5' }}>
-                  {tool.label}
-                </p>
-                <p style={{ margin: '2px 0 0', fontSize: 10, color: '#6b7280' }}>
+                {/* LED dot */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: tool.dot, boxShadow: `0 0 6px ${tool.dot}` }} />
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+                    {tool.label}
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>
                   {tool.description}
                 </p>
               </div>
@@ -182,18 +136,6 @@ export default function NodeToolbar() {
           </button>
         </div>
       ))}
-
-      {/* Divider */}
-      <div
-        style={{
-          width: 28,
-          height: 1,
-          background: '#1e1e1e',
-          marginTop: 4,
-          marginBottom: 4,
-          flexShrink: 0,
-        }}
-      />
     </div>
   )
 }

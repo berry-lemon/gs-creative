@@ -52,10 +52,10 @@ export default function TopBar() {
         }}>
           G
         </div>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+        <span className="topbar-brand-label" style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
           GS Creative
         </span>
-        <span style={{
+        <span className="topbar-brand-tag" style={{
           fontFamily: 'var(--font-display)',
           fontSize: 8,
           fontWeight: 700,
@@ -146,6 +146,7 @@ function TbBtn({ onClick, icon, label, title, accent = false }: { onClick: () =>
     <button
       onClick={onClick}
       title={title}
+      className="topbar-btn"
       style={{
         height: 30,
         borderRadius: 8,
@@ -153,7 +154,7 @@ function TbBtn({ onClick, icon, label, title, accent = false }: { onClick: () =>
         border: `1px solid ${accent ? 'var(--border-hi)' : 'var(--border-base)'}`,
         color: accent ? 'var(--accent)' : 'var(--text-muted)',
         cursor: 'pointer',
-        display: 'flex', alignItems: 'center', gap: 5,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
         padding: '0 10px',
         fontFamily: 'var(--font-display)',
         fontSize: 9,
@@ -165,7 +166,7 @@ function TbBtn({ onClick, icon, label, title, accent = false }: { onClick: () =>
       onMouseEnter={(e) => { const b = e.currentTarget; b.style.background = 'var(--accent-bg-hover)'; b.style.color = 'var(--accent)'; b.style.borderColor = 'var(--border-hi)'; b.style.boxShadow = `0 0 10px var(--accent-glow)` }}
       onMouseLeave={(e) => { const b = e.currentTarget; b.style.background = accent ? 'var(--accent-bg)' : 'transparent'; b.style.color = accent ? 'var(--accent)' : 'var(--text-muted)'; b.style.borderColor = accent ? 'var(--border-hi)' : 'var(--border-base)'; b.style.boxShadow = 'none' }}
     >
-      {icon}{label}
+      {icon}<span className="topbar-btn-label">{label}</span>
     </button>
   )
 }

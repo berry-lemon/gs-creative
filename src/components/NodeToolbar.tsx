@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
 import { Type, Image, ImagePlus, Palette, Brain, Monitor, Baseline } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { useIsMobile } from '../lib/useIsMobile'
 
 interface ToolItem {
   type: string
@@ -25,6 +26,7 @@ export default function NodeToolbar() {
   const addNode = useStore((s) => s.addNode)
   const { getViewport } = useReactFlow()
   const [hovered, setHovered] = useState<number | null>(null)
+  const isMobile = useIsMobile()
 
   const handleAdd = useCallback(
     (type: string) => {
@@ -36,9 +38,25 @@ export default function NodeToolbar() {
     [addNode, getViewport]
   )
 
-  return (
-    <div
-      style={{
+  const containerStyle: React.CSSProperties = isMobile
+    ? {
+        position: 'absolute',
+        left: 0, right: 0, bottom: 0,
+        height: 64,
+        background: 'var(--bg-surface)',
+        borderTop: '1px solid var(--border-base)',
+        boxShadow: 'inset 0 1px 0 var(--border-hi)',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '0 8px',
+        gap: 4,
+        zIndex: 10,
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        WebkitOverflowScrolling: 'touch',
+      }
+    : {
         position: 'absolute',
         left: 0, top: 48, bottom: 0,
         width: 58,
@@ -52,19 +70,22 @@ export default function NodeToolbar() {
         paddingBottom: 10,
         gap: 4,
         zIndex: 10,
-      }}
-    >
-      <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4, marginTop: 4 }} />
+      }
+
+  return (
+    <div style={containerStyle}>
+      {!isMobile && <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4, marginTop: 4 }} />}
 
       {TOOLS.map((tool, index) => (
-        <div key={tool.type} style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div key={tool.type} style={{ position: 'relative', display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
           <button
             onClick={() => handleAdd(tool.type)}
             onMouseEnter={() => setHovered(index)}
             onMouseLeave={() => setHovered(null)}
+            title={`${tool.label} — ${tool.description}`}
             style={{
-              width: 42,
-              height: 42,
+              width: isMobile ? 52 : 42,
+              height: isMobile ? 52 : 42,
               borderRadius: 10,
               background: hovered === index ? 'var(--accent-bg)' : 'transparent',
               border: `1px solid ${hovered === index ? 'var(--border-hi)' : 'transparent'}`,
@@ -77,15 +98,16 @@ export default function NodeToolbar() {
               gap: 2,
               transition: 'all 0.12s',
               boxShadow: hovered === index ? `0 0 12px ${tool.dot}33` : 'none',
+              flexShrink: 0,
             }}
           >
             {tool.icon}
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 6, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1 }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 7 : 6, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1 }}>
               {tool.label}
             </span>
 
-            {/* Tooltip */}
-            {hovered === index && (
+            {/* Tooltip — desktop only; positioned right of button (vertical bar) or above (horizontal bar) */}
+            {hovered === index && !isMobile && (
               <div
                 style={{
                   position: 'absolute',
@@ -103,7 +125,6 @@ export default function NodeToolbar() {
                   minWidth: 180,
                 }}
               >
-                {/* LED dot */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: tool.dot, boxShadow: `0 0 6px ${tool.dot}` }} />
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>

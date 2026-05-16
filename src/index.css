@@ -492,3 +492,64 @@ html, body, #root {
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ── Mobile / touch ─────────────────────────────────────── */
+
+/* Larger handles on touch devices for easier tapping */
+@media (pointer: coarse) {
+  .react-flow__handle {
+    width: 16px;
+    height: 16px;
+    border-width: 3px;
+  }
+  .react-flow__edge-interaction {
+    stroke-width: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Compact node bodies and headers on small screens */
+  .gs-node { min-width: 220px !important; max-width: 88vw; }
+  .gs-node-body { padding: 10px 12px; }
+  .gs-node-header { padding: 8px 10px 8px 12px; }
+
+  /* Settings panel full-width */
+  .settings-panel-mobile {
+    width: 100vw !important;
+  }
+
+  /* Hide minimap on small screens — too cramped */
+  .react-flow__minimap { display: none !important; }
+
+  /* Push controls up to clear the bottom toolbar */
+  .react-flow__controls {
+    bottom: 78px !important;
+    right: 12px !important;
+  }
+
+  /* Hide the long brand label in the topbar */
+  .topbar-brand-label { display: none !important; }
+  .topbar-brand-tag { display: none !important; }
+
+  /* Hide button text labels — keep only the icons */
+  .topbar-btn-label { display: none !important; }
+  .topbar-btn { padding: 0 8px !important; min-width: 32px !important; }
+}
+
+/* Disable text selection inside ReactFlow on touch — feels janky otherwise */
+@media (pointer: coarse) {
+  .react-flow,
+  .react-flow__pane,
+  .react-flow__renderer {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Re-enable selection inside form inputs and editable areas */
+  .react-flow input,
+  .react-flow textarea,
+  .react-flow [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}

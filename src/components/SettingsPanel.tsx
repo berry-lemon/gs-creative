@@ -28,10 +28,12 @@ export default function SettingsPanel() {
 
       {/* Panel */}
       <div
+        className="settings-panel-mobile"
         style={{
           position: 'fixed',
           top: 0, right: 0, bottom: 0,
           width: 340,
+          maxWidth: '100vw',
           background: 'var(--bg-surface)',
           borderLeft: '1px solid var(--border-base)',
           boxShadow: 'var(--node-bevel), -8px 0 40px rgba(0,0,0,0.5)',

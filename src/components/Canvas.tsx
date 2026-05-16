@@ -9,6 +9,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useStore } from '../store/useStore'
+import { useIsMobile } from '../lib/useIsMobile'
 import { nodeTypes } from '../nodes'
 import DeletableEdge from './DeletableEdge'
 import NodeToolbar from './NodeToolbar'
@@ -36,6 +37,7 @@ export default function Canvas() {
   const onEdgesChange   = useStore((s) => s.onEdgesChange)
   const onConnect       = useStore((s) => s.onConnect)
   const loadFromUrl     = useStore((s) => s.loadFromUrl)
+  const isMobile        = useIsMobile()
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -70,7 +72,15 @@ export default function Canvas() {
       <TopBar />
 
       {/* ReactFlow fills the space left after toolbar/topbar */}
-      <div style={{ position: 'absolute', inset: 0, paddingLeft: 58, paddingTop: 48 }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          paddingLeft: isMobile ? 0 : 58,
+          paddingTop: 48,
+          paddingBottom: isMobile ? 64 : 0,
+        }}
+      >
         {/* Animated gradient blobs sit BEHIND ReactFlow nodes but above its bg */}
         {gradientEnabled && (
           <div className="gradient-bg" aria-hidden="true">

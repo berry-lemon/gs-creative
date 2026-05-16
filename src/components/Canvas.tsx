@@ -33,7 +33,6 @@ export default function Canvas() {
   const onConnect     = useStore((s) => s.onConnect)
   const loadFromUrl   = useStore((s) => s.loadFromUrl)
 
-  // Apply theme to <html> on mount and whenever it changes
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
@@ -42,55 +41,68 @@ export default function Canvas() {
     loadFromUrl()
   }, [loadFromUrl])
 
+  // Escape key escape hatch: if a drag ever gets stuck, pressing Escape
+  // fires a synthetic mouseup so ReactFlow can clean up its drag state.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }))
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const getNodeColor = useCallback((node: Node) => NODE_COLORS[node.type ?? ''] ?? '#4b5563', [])
 
   return (
+    // Outer wrapper: NodeToolbar and TopBar sit HERE, as siblings of ReactFlow.
+    // This prevents them from intercepting mouseup events during node drags.
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        deleteKeyCode={['Delete', 'Backspace']}
-        proOptions={{ hideAttribution: true }}
-        defaultEdgeOptions={{
-          type: 'default',
-          animated: true,
-          style: { stroke: 'var(--edge-color)', strokeWidth: 2 },
-        }}
-        style={{ background: 'var(--bg-canvas)' }}
-        minZoom={0.05}
-        maxZoom={3}
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={28}
-          size={1.5}
-          color="var(--border-base)"
-        />
 
-        <Controls position="bottom-right" style={{ bottom: 24, right: 24 }} />
+      {/* NodeToolbar and TopBar are OUTSIDE ReactFlow so pointer events during
+          drag don't get swallowed by these panels */}
+      <NodeToolbar />
+      <TopBar />
 
-        <MiniMap
-          position="bottom-right"
-          style={{ bottom: 136, right: 24, width: 140, height: 90 }}
-          nodeColor={getNodeColor}
-          maskColor="var(--minimap-mask)"
-          nodeStrokeWidth={0}
-        />
+      {/* ReactFlow fills the space left after toolbar/topbar */}
+      <div style={{ position: 'absolute', inset: 0, paddingLeft: 58, paddingTop: 48 }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          deleteKeyCode={['Delete', 'Backspace']}
+          proOptions={{ hideAttribution: true }}
+          defaultEdgeOptions={{
+            type: 'default',
+            animated: true,
+            style: { stroke: 'var(--edge-color)', strokeWidth: 2 },
+          }}
+          style={{ background: 'var(--bg-canvas)' }}
+          minZoom={0.05}
+          maxZoom={3}
+        >
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={28}
+            size={1.5}
+            color="var(--border-base)"
+          />
+          <Controls />
+          <MiniMap
+            style={{ width: 140, height: 90 }}
+            nodeColor={getNodeColor}
+            maskColor="var(--minimap-mask)"
+            nodeStrokeWidth={0}
+          />
+        </ReactFlow>
+      </div>
 
-        {/* Left toolbar */}
-        <NodeToolbar />
-
-        {/* Top bar */}
-        <TopBar />
-      </ReactFlow>
-
-      {/* Settings overlay — outside ReactFlow so it can cover it */}
       <SettingsPanel />
     </div>
   )

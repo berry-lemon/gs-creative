@@ -40,7 +40,7 @@ export default function NodeToolbar() {
     <div
       style={{
         position: 'absolute',
-        left: 0, top: 0, bottom: 0,
+        left: 0, top: 48, bottom: 0,
         width: 58,
         background: 'var(--bg-surface)',
         borderRight: '1px solid var(--border-base)',

@@ -24,7 +24,7 @@ export default function TopBar() {
     <div
       style={{
         position: 'absolute',
-        top: 0, left: 58, right: 0,
+        top: 0, left: 0, right: 0,
         height: 48,
         background: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border-base)',

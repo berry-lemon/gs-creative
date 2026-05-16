@@ -10,9 +10,12 @@ import {
 import '@xyflow/react/dist/style.css'
 import { useStore } from '../store/useStore'
 import { nodeTypes } from '../nodes'
+import DeletableEdge from './DeletableEdge'
 import NodeToolbar from './NodeToolbar'
 import TopBar from './TopBar'
 import SettingsPanel from './SettingsPanel'
+
+const edgeTypes = { default: DeletableEdge }
 
 const NODE_COLORS: Record<string, string> = {
   textNode:         '#a78bfa',
@@ -80,6 +83,7 @@ export default function Canvas() {
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}

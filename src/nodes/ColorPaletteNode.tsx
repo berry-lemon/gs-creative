@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState, useEffect } from 'react'
 import { Position, type NodeProps, useReactFlow } from '@xyflow/react'
 import { Plus, X, Wand2, Loader2 } from 'lucide-react'
 import { useStore } from '../store/useStore'
@@ -19,6 +19,7 @@ function ColorPaletteNode({ id, data }: NodeProps) {
   const [hexInput, setHexInput] = useState('')
   const [hexError, setHexError] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const prevBase64Ref = useRef('')
 
   const update = useCallback(
     (next: string[]) => updateNodeData(id, { colors: next.slice(0, MAX_COLORS) }),
@@ -72,11 +73,30 @@ function ColorPaletteNode({ id, data }: NodeProps) {
     }
   }, [id, colors, getEdges, getNode, update])
 
-  // Detect connected image so we can show/hide the sync button
+  // Detect connected image (read at render time so the effect can react to it)
   const edges = getEdges()
   const incomingEdge = edges.find((e) => e.target === id)
   const incomingSrc = incomingEdge ? getNode(incomingEdge.source) : null
-  const hasImage = !!(incomingSrc && (incomingSrc.data as unknown as ImageData)?.base64)
+  const connectedBase64 = (incomingSrc?.data as unknown as ImageData)?.base64 ?? ''
+  const hasImage = !!connectedBase64
+
+  // Keep a ref to current colors so the auto-extract effect always has fresh values
+  const colorsRef = useRef(colors)
+  colorsRef.current = colors
+
+  // Auto-extract when a new image is connected or the image changes
+  useEffect(() => {
+    if (!connectedBase64 || connectedBase64 === prevBase64Ref.current) return
+    prevBase64Ref.current = connectedBase64
+    setSyncing(true)
+    extractColors(connectedBase64, 3).then((extracted) => {
+      if (extracted.length === 0) return
+      const current = colorsRef.current
+      const unique = extracted.filter((c) => !current.includes(c))
+      if (unique.length === 0) return
+      updateNodeData(id, { colors: [...current, ...unique].slice(0, MAX_COLORS) })
+    }).finally(() => setSyncing(false))
+  }, [connectedBase64, id, updateNodeData])
 
   return (
     <NodeWrapper id={id} label="Palette" dotColor="#f59e0b" tooltip="Define brand colors — type hex codes or sync from a connected image" minWidth={272}>

@@ -1,37 +1,38 @@
 import { memo, useCallback, useState } from 'react'
 import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react'
-import { Sparkles, ChevronDown, ChevronUp, Loader2, Copy } from 'lucide-react'
+import { Brain, ChevronDown, ChevronUp, Loader2, Copy } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { generateText } from '../lib/gemini'
 import NodeWrapper from '../components/NodeWrapper'
 import TooltipHandle from '../components/TooltipHandle'
 
-interface GeminiNodeData { systemPrompt: string; model: string; output: string; isGenerating: boolean }
+interface BrainNodeData { systemPrompt: string; model: string; output: string; isGenerating: boolean }
 interface TextNodeData { text: string }
 interface ImageNodeData { base64: string; mimeType: string }
-interface PrevGeminiData { output: string }
+interface PrevBrainData { output: string }
 
-const MODEL_OPTIONS = [
-  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
-  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
-  { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+// Model stays internal — users never see these names
+const DEFAULT_MODEL = 'gemini-2.0-flash'
+const ADVANCED_MODELS = [
+  { value: 'gemini-2.0-flash',  label: 'Fast'    },
+  { value: 'gemini-2.5-pro',    label: 'Detailed' },
+  { value: 'gemini-1.5-flash',  label: 'Balanced' },
 ]
 
 const IMAGE_HANDLE_IDS = ['image-0', 'image-1', 'image-2', 'image-3', 'image-4']
 const HANDLE_SPACING = 30
 
 function GeminiNode({ id, data }: NodeProps) {
-  const nodeData = data as unknown as GeminiNodeData
+  const nodeData = data as unknown as BrainNodeData
   const updateNodeData = useStore((s) => s.updateNodeData)
   const apiKey = useStore((s) => s.apiKey)
   const { getEdges, getNode } = useReactFlow()
-  const [systemExpanded, setSystemExpanded] = useState(false)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
 
-  const handleGenerate = useCallback(async () => {
+  const handleAsk = useCallback(async () => {
     if (!apiKey) {
-      alert('Open Settings (top-right gear) and enter your Gemini API key.')
+      alert('A connection key is required. Open Settings (top-right ⚙) and paste your key.')
       return
     }
     if (nodeData.isGenerating) return
@@ -49,7 +50,7 @@ function GeminiNode({ id, data }: NodeProps) {
         if (src.type === 'textNode') {
           userPrompt = ((src.data as unknown as TextNodeData).text) ?? ''
         } else if (src.type === 'geminiNode') {
-          userPrompt = ((src.data as unknown as PrevGeminiData).output) ?? ''
+          userPrompt = ((src.data as unknown as PrevBrainData).output) ?? ''
         }
       } else if (IMAGE_HANDLE_IDS.includes(handle)) {
         if (src.type === 'imageUploadNode' || src.type === 'logoNode') {
@@ -61,11 +62,16 @@ function GeminiNode({ id, data }: NodeProps) {
 
     updateNodeData(id, { isGenerating: true, output: '' })
     try {
-      await generateText(apiKey, nodeData.model || 'gemini-2.0-flash', nodeData.systemPrompt || '', userPrompt, images, (partial) => {
-        updateNodeData(id, { output: partial })
-      })
+      await generateText(
+        apiKey,
+        nodeData.model || DEFAULT_MODEL,
+        nodeData.systemPrompt || '',
+        userPrompt,
+        images,
+        (partial) => updateNodeData(id, { output: partial })
+      )
     } catch (err) {
-      updateNodeData(id, { output: `Error: ${err instanceof Error ? err.message : String(err)}` })
+      updateNodeData(id, { output: `Something went wrong: ${err instanceof Error ? err.message : String(err)}` })
     } finally {
       updateNodeData(id, { isGenerating: false })
     }
@@ -79,35 +85,29 @@ function GeminiNode({ id, data }: NodeProps) {
     })
   }, [nodeData.output])
 
-  /* Handle positions — relative to node top */
   const TEXT_TOP = 48
   const imgTops = IMAGE_HANDLE_IDS.map((_, i) => TEXT_TOP + HANDLE_SPACING * (i + 1))
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Left target handles rendered outside NodeWrapper for positioning */}
+      {/* Input handles */}
       <Handle
-        type="target"
-        position={Position.Left}
-        id="text-input"
+        type="target" position={Position.Left} id="text-input"
         style={{ top: TEXT_TOP, borderColor: '#a78bfa', background: 'var(--bg-display)' }}
-        title="Text / prompt input"
+        title="Ask — connect a text node here"
       />
       {IMAGE_HANDLE_IDS.map((hid, i) => (
         <Handle
-          key={hid}
-          type="target"
-          position={Position.Left}
-          id={hid}
+          key={hid} type="target" position={Position.Left} id={hid}
           style={{ top: imgTops[i], borderColor: '#f59e0b', background: 'var(--bg-display)' }}
-          title={`Image input ${i + 1}`}
+          title={`Image ${i + 1} — connect an image here`}
         />
       ))}
 
-      {/* Handle labels pinned to left of node */}
-      <div style={{ position: 'absolute', left: -68, top: TEXT_TOP - 8, display: 'flex', flexDirection: 'column', gap: 0, pointerEvents: 'none' }}>
+      {/* Handle labels */}
+      <div style={{ position: 'absolute', left: -62, top: TEXT_TOP - 8, display: 'flex', flexDirection: 'column', pointerEvents: 'none' }}>
         <div style={{ height: HANDLE_SPACING, display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Text</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ask</span>
         </div>
         {IMAGE_HANDLE_IDS.map((_, i) => (
           <div key={i} style={{ height: HANDLE_SPACING, display: 'flex', alignItems: 'center' }}>
@@ -116,92 +116,99 @@ function GeminiNode({ id, data }: NodeProps) {
         ))}
       </div>
 
-      <NodeWrapper id={id} label="Gemini" dotColor="var(--accent)" tooltip="AI text generation — connect Text and Image nodes as inputs" minWidth={300}>
-        {/* Model selector inline in the body */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <Sparkles size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <select
-            className="gs-select"
-            value={nodeData.model || 'gemini-2.0-flash'}
-            onChange={(e) => updateNodeData(id, { model: e.target.value })}
-            style={{ fontSize: 10, height: 28, padding: '0 24px 0 8px' }}
-          >
-            {MODEL_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+      <NodeWrapper id={id} label="Brain" dotColor="var(--accent)" tooltip="Ask a question — connect text and images, get an answer" minWidth={300}>
+        {/* Answer area */}
+        <label className="gs-label">Answer</label>
+        <div
+          className={`gs-output${nodeData.isGenerating ? ' streaming' : ''}`}
+          style={{ minHeight: 80, maxHeight: 240, marginBottom: 10 }}
+        >
+          {nodeData.output
+            ? <span className={nodeData.isGenerating ? 'cursor-blink' : ''}>{nodeData.output}</span>
+            : <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>
+                {nodeData.isGenerating ? 'Thinking…' : 'Connect a text node to "Ask", then hit the button below'}
+              </span>
+          }
         </div>
 
-        {/* System prompt collapsible */}
+        {/* Ask button */}
         <button
-          onClick={() => setSystemExpanded((v) => !v)}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', padding: '4px 0', cursor: 'pointer', width: '100%' }}
+          className="gs-btn"
+          onClick={handleAsk}
+          disabled={nodeData.isGenerating}
+          style={{ width: '100%', justifyContent: 'center', marginBottom: 8 }}
         >
-          <span className="gs-label" style={{ margin: 0, flex: 1 }}>System Prompt</span>
-          {systemExpanded ? <ChevronUp size={11} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={11} style={{ color: 'var(--text-muted)' }} />}
+          {nodeData.isGenerating
+            ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Thinking…</>
+            : <><Brain size={12} /> Ask</>
+          }
         </button>
-        {systemExpanded && (
-          <textarea
-            className="gs-textarea"
-            value={nodeData.systemPrompt}
-            onChange={(e) => updateNodeData(id, { systemPrompt: e.target.value })}
-            placeholder="You are an expert creative director…"
-            rows={3}
-            style={{ minHeight: 70, marginBottom: 8 }}
-          />
-        )}
 
-        <hr className="gs-divider" />
-
-        {/* Output */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <label className="gs-label" style={{ margin: 0 }}>Output</label>
+        {/* Copy + Advanced in a row */}
+        <div style={{ display: 'flex', gap: 6 }}>
           {nodeData.output && (
             <button
               onClick={handleCopy}
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: copySuccess ? 'var(--accent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3, fontSize: 9, fontFamily: 'var(--font-display)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: 0, transition: 'color 0.12s' }}
+              className="gs-btn-ghost"
+              style={{ flex: 1, justifyContent: 'center', fontSize: 9 }}
             >
-              <Copy size={9} />
-              {copySuccess ? 'Copied' : 'Copy'}
+              <Copy size={10} style={{ marginRight: 4 }} />
+              {copySuccess ? 'Copied!' : 'Copy answer'}
             </button>
           )}
-        </div>
-        <div className={`gs-output${nodeData.isGenerating ? ' streaming' : ''}`} style={{ minHeight: 80, maxHeight: 240, marginBottom: 10 }}>
-          {nodeData.output
-            ? <span className={nodeData.isGenerating ? 'cursor-blink' : ''}>{nodeData.output}</span>
-            : <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>{nodeData.isGenerating ? 'Generating…' : 'Output will appear here'}</span>
-          }
+          <button
+            onClick={() => setAdvancedOpen((v) => !v)}
+            className="gs-btn-ghost"
+            style={{ flex: nodeData.output ? undefined : 1, justifyContent: 'center', fontSize: 9, padding: '6px 10px' }}
+          >
+            {advancedOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+            <span style={{ marginLeft: 4 }}>Advanced</span>
+          </button>
         </div>
 
-        <button
-          className="gs-btn"
-          onClick={handleGenerate}
-          disabled={nodeData.isGenerating}
-          style={{ width: '100%', justifyContent: 'center' }}
-        >
-          {nodeData.isGenerating
-            ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Generating…</>
-            : <><Sparkles size={12} /> Generate</>
-          }
-        </button>
+        {/* Advanced panel — speed + personality */}
+        {advancedOpen && (
+          <div style={{ marginTop: 10, borderTop: '1px solid var(--border-base)', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div>
+              <label className="gs-label">Speed vs Detail</label>
+              <select
+                className="gs-select"
+                value={nodeData.model || DEFAULT_MODEL}
+                onChange={(e) => updateNodeData(id, { model: e.target.value })}
+              >
+                {ADVANCED_MODELS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="gs-label">Personality / instructions</label>
+              <textarea
+                className="gs-textarea"
+                value={nodeData.systemPrompt}
+                onChange={(e) => updateNodeData(id, { systemPrompt: e.target.value })}
+                placeholder="e.g. You are a friendly brand expert who keeps answers short and punchy."
+                rows={3}
+                style={{ minHeight: 70 }}
+              />
+            </div>
+          </div>
+        )}
 
         {!apiKey && (
           <p style={{ marginTop: 8, fontSize: 9, fontFamily: 'var(--font-display)', color: '#f59e0b', textAlign: 'center', letterSpacing: '0.06em' }}>
-            API key required — open Settings ↗
+            No key yet — open Settings ⚙ to connect
           </p>
         )}
       </NodeWrapper>
 
-      {/* Output handle */}
       <TooltipHandle
-        type="source"
-        position={Position.Right}
-        id="text-output"
-        tooltip="Generated text output"
+        type="source" position={Position.Right} id="text-output"
+        tooltip="Answer — connect to another Brain or Text node"
         style={{ top: '50%', borderColor: 'var(--accent)', background: 'var(--bg-display)' }}
       />
 
-      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 }

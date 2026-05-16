@@ -129,34 +129,40 @@ html, body, #root {
   box-shadow: var(--node-shadow), 0 0 0 2px var(--accent), 0 0 28px var(--accent-glow) !important;
 }
 
-/* Controls */
+/* Controls — fixed dark so they're always legible regardless of theme */
 .react-flow__controls {
-  background: #1a1a18;
-  border: 1px solid #333;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-[data-theme="light"] .react-flow__controls {
-  background: #2a2a28;
-  border-color: #444;
+  background: #1c1c1a !important;
+  border: 1px solid #383836 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
 }
 .react-flow__controls-button {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #2e2e2c;
-  color: #888;
-  width: 28px;
-  height: 28px;
-  padding: 5px;
-  transition: all 0.12s;
+  background: #1c1c1a !important;
+  border: none !important;
+  border-bottom: 1px solid #2e2e2c !important;
+  color: #7a7a78 !important;
+  fill: #7a7a78 !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 6px !important;
+  transition: color 0.12s, background 0.12s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .react-flow__controls-button:hover {
-  background: rgba(118, 255, 3, 0.12);
-  color: #76ff03;
+  background: #28281e !important;
+  color: #76ff03 !important;
+  fill: #76ff03 !important;
 }
-.react-flow__controls-button:last-child { border-bottom: none; }
-.react-flow__controls-button svg { fill: currentColor; width: 12px; height: 12px; }
+.react-flow__controls-button:last-child { border-bottom: none !important; }
+.react-flow__controls-button svg {
+  fill: inherit !important;
+  stroke: none !important;
+  width: 12px !important;
+  height: 12px !important;
+}
 
 /* MiniMap */
 .react-flow__minimap {

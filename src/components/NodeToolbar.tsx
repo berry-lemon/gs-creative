@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
-import { Type, Image, ImagePlus, Palette, Sparkles, Monitor, Baseline } from 'lucide-react'
+import { Type, Image, ImagePlus, Palette, Brain, Monitor, Baseline } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 interface ToolItem {
@@ -17,7 +17,7 @@ const TOOLS: ToolItem[] = [
   { type: 'logoNode',         label: 'Logo',    description: 'Upload a brand logo with transparency support',   icon: <ImagePlus size={16} />, dot: '#ec4899' },
   { type: 'colorPaletteNode', label: 'Palette', description: 'Define brand colors — click swatches to edit',   icon: <Palette size={16} />,   dot: '#f59e0b' },
   { type: 'fontNode',         label: 'Font',    description: 'Load any Google Font with live preview',          icon: <Baseline size={16} />,  dot: '#10b981' },
-  { type: 'geminiNode',       label: 'Gemini',  description: 'AI text generation — streaming, multi-modal',    icon: <Sparkles size={16} />,  dot: 'var(--accent)' },
+  { type: 'geminiNode',       label: 'Brain',   description: 'Ask a question, get an answer — connect text & images', icon: <Brain size={16} />, dot: 'var(--accent)' },
   { type: 'imageOutputNode',  label: 'Output',  description: 'Display an image piped from an upstream node',   icon: <Monitor size={16} />,   dot: '#6366f1' },
 ]
 
@@ -54,34 +54,7 @@ export default function NodeToolbar() {
         zIndex: 10,
       }}
     >
-      {/* Bold G logo */}
-      <div
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 10,
-          background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 10,
-          flexShrink: 0,
-          boxShadow: '0 0 18px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.25)',
-          fontFamily: 'var(--font-display)',
-          fontWeight: 900,
-          fontSize: 22,
-          lineHeight: 1,
-          color: '#040a02',
-          letterSpacing: '-0.04em',
-          textShadow: '0 1px 0 rgba(255,255,255,0.3)',
-          userSelect: 'none',
-        }}
-        title="GS Creative Studio"
-      >
-        G
-      </div>
-
-      <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4 }} />
+      <div style={{ width: 30, height: 1, background: 'var(--border-base)', marginBottom: 4, marginTop: 4 }} />
 
       {TOOLS.map((tool, index) => (
         <div key={tool.type} style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>

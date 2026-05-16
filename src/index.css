@@ -131,25 +131,29 @@ html, body, #root {
 
 /* Controls */
 .react-flow__controls {
-  background: var(--bg-node);
-  border: 1px solid var(--border-base);
+  background: #1a1a18;
+  border: 1px solid #333;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: var(--node-shadow);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+[data-theme="light"] .react-flow__controls {
+  background: #2a2a28;
+  border-color: #444;
 }
 .react-flow__controls-button {
-  background: var(--bg-node);
+  background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border-base);
-  color: var(--text-muted);
+  border-bottom: 1px solid #2e2e2c;
+  color: #888;
   width: 28px;
   height: 28px;
   padding: 5px;
   transition: all 0.12s;
 }
 .react-flow__controls-button:hover {
-  background: var(--accent-bg);
-  color: var(--accent);
+  background: rgba(118, 255, 3, 0.12);
+  color: #76ff03;
 }
 .react-flow__controls-button:last-child { border-bottom: none; }
 .react-flow__controls-button svg { fill: currentColor; width: 12px; height: 12px; }

@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Settings, Download, Upload, Share2, Sun, Moon, Sparkles, Waves } from 'lucide-react'
+import { Settings, Download, Upload, Share2, Sun, Moon, Waves } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 export default function TopBar() {
@@ -41,7 +41,17 @@ export default function TopBar() {
     >
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-        <Sparkles size={13} style={{ color: 'var(--accent)' }} />
+        <div style={{
+          width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+          background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 16, lineHeight: 1,
+          color: '#040a02', letterSpacing: '-0.04em',
+          boxShadow: '0 0 12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3)',
+          userSelect: 'none',
+        }}>
+          G
+        </div>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
           GS Creative
         </span>
